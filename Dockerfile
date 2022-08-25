@@ -1,6 +1,8 @@
 FROM php:8-fpm
 
-# Install packages
+# Install composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
 RUN apt-get update && \
     apt-get install -y --force-yes --no-install-recommends \
         libmemcached-dev \
@@ -14,13 +16,9 @@ RUN apt-get update && \
         libpng-dev \
         libfreetype6-dev \
         libssl-dev \
-        openssh-server \
         libmagickwand-dev \
-        git \
         cron \
-        nano \
-        libxml2-dev \
-        mariadb-client
+        libxml2-dev
 
 # Install docker-php-ext extensions
 RUN docker-php-ext-install bcmath
@@ -45,13 +43,6 @@ RUN pecl install xdebug
 
 # Install and enable memcached
 RUN pecl install memcached && docker-php-ext-enable memcached
-
-# Install composer and add its bin to the PATH.
-RUN curl -s http://getcomposer.org/installer | php && \
-    echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
-    mv composer.phar /usr/local/bin/composer
-# Source the bash
-RUN . ~/.bashrc
 
 # Laravel Schedule Cron Job
 RUN echo "* * * * * root /usr/local/bin/php /var/www/artisan schedule:run >> /dev/null 2>&1"  >> /etc/cron.d/laravel-scheduler
