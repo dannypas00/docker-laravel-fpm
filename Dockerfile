@@ -1,4 +1,4 @@
-FROM php:8-fpm
+FROM php:8.2-fpm
 
 # Install composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
@@ -14,8 +14,9 @@ RUN apt-get update && \
         libpq-dev \
         libfreetype6-dev \
         libssl-dev \
-        cron \
         libxml2-dev \
+	libmagickwand-dev \
+	git \
 	supervisor
 
 # Install docker-php-ext extensions
@@ -40,13 +41,12 @@ RUN pecl install xdebug
 # Install and enable memcached
 RUN pecl install memcached && docker-php-ext-enable memcached
 
-# Laravel Schedule Cron Job
-RUN echo "* * * * * root /usr/local/bin/php /var/www/artisan schedule:run >> /dev/null 2>&1"  >> /etc/cron.d/laravel-scheduler
-RUN chmod 0644 /etc/cron.d/laravel-scheduler
+# Install and enable imagick
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 RUN usermod -u 1000 www-data
 
 WORKDIR /var/www
 
 EXPOSE 9000
-CMD ["/usr/bin/supervisord"]
+CMD ["php-fpm"]
