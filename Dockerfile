@@ -12,31 +12,27 @@ RUN apt-get update && \
         libzip-dev \
         libz-dev \
         libpq-dev \
-        libjpeg-dev \
-        libpng-dev \
         libfreetype6-dev \
         libssl-dev \
-        libmagickwand-dev \
         cron \
-        libxml2-dev
+        libxml2-dev \
+	supervisor
 
 # Install docker-php-ext extensions
-RUN docker-php-ext-install bcmath
-RUN docker-php-ext-install exif
-RUN docker-php-ext-install soap
-RUN docker-php-ext-install pcntl
-RUN docker-php-ext-install intl
-RUN docker-php-ext-install gmp
-RUN docker-php-ext-install zip
-RUN docker-php-ext-install pdo_mysql
-RUN docker-php-ext-install pdo_pgsql
-RUN docker-php-ext-install gd
+RUN docker-php-ext-install \
+	bcmath \
+	exif \
+	soap \
+	pcntl \
+	intl \
+	gmp \
+	zip \
+	pdo_mysql \
+	sockets \
+	gd
 
 # Install and enable PHPRedis
 RUN pecl install redis && docker-php-ext-enable redis
-
-# Install and enable imagick
-RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Install xdebug
 RUN pecl install xdebug
@@ -53,4 +49,4 @@ RUN usermod -u 1000 www-data
 WORKDIR /var/www
 
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord"]
